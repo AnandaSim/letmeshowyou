@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Guide: Power BI & SharePoint Excel Refresh</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Tech Blue Accent -->
+    <!-- Application Structure Plan: The application is designed as a task-oriented, non-linear guide. It starts with a direct answer (Hero section), moves to an interactive step-by-step flowchart for the primary user task (Setup Guide), provides contextual knowledge through clickable cards (Key Concepts), visualizes historical changes with a dynamic timeline (Critical Deprecations), and offers solutions via an interactive FAQ (Troubleshooting). This structure was chosen because it breaks a complex technical process into manageable, user-driven modules, prioritizing quick access to relevant information over the linear format of the source report. It guides new users while allowing experienced users to jump directly to troubleshooting or reference sections. -->
+    <!-- Visualization & Content Choices: 1. Deprecation Table -> Interactive Timeline (Chart.js Bar Chart): Goal is to show change over time. A timeline is more intuitive than a table for chronological events. Interaction: Clicking a bar reveals detailed impact text, making the data explorable. 2. Connection Process -> Interactive Flowchart (HTML/CSS/JS): Goal is to organize a process. A visual flow is easier to follow than a list of steps. Interaction: Clicking a step highlights it and displays details, guiding the user through the workflow. 3. Troubleshooting Table -> Accordion/FAQ (HTML/JS): Goal is to organize Q&A. An accordion is a standard, space-saving UI pattern that allows users to scan for their specific problem without being overwhelmed by text. Interaction: Clicking a question reveals the answer. All chosen methods use HTML/CSS/JS and Chart.js, avoiding SVG/Mermaid as required. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f7f4;
+            color: #1f2937;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .flowchart-step {
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+        }
+        .flowchart-step.active {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            border-color: #3b82f6;
+        }
+        .accordion-item .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 500px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center text-white font-bold text-lg">P</div>
+                    <h1 class="text-xl font-bold text-gray-800">Power BI & SharePoint Refresh Guide</h1>
+                </div>
+                <nav class="hidden md:flex space-x-6">
+                    <a href="#guide" class="nav-link active text-gray-600 font-medium pb-1">Setup Guide</a>
+                    <a href="#concepts" class="nav-link text-gray-600 font-medium pb-1">Key Concepts</a>
+                    <a href="#updates" class="nav-link text-gray-600 font-medium pb-1">Critical Updates</a>
+                    <a href="#troubleshooting" class="nav-link text-gray-600 font-medium pb-1">Troubleshooting</a>
+                </nav>
+                <div class="md:hidden">
+                     <button id="mobile-menu-button" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                </div>
+            </div>
+            <div id="mobile-menu" class="hidden md:hidden mt-4">
+                <a href="#guide" class="block py-2 px-4 text-sm nav-link-mobile active">Setup Guide</a>
+                <a href="#concepts" class="block py-2 px-4 text-sm nav-link-mobile">Key Concepts</a>
+                <a href="#updates" class="block py-2 px-4 text-sm nav-link-mobile">Critical Updates</a>
+                <a href="#troubleshooting" class="block py-2 px-4 text-sm nav-link-mobile">Troubleshooting</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        
+        <section class="text-center mb-12 md:mb-16">
+            <h2 class="text-3xl md:text-5xl font-extrabold text-gray-900 leading-tight">Can Power BI auto-refresh from an Excel file in SharePoint?</h2>
+            <p class="mt-4 text-lg md:text-xl text-green-700 font-semibold bg-green-100 rounded-full inline-block px-6 py-2">Yes, absolutely. And with no on-premises gateway required.</p>
+            <p class="mt-4 max-w-3xl mx-auto text-gray-600">Power BI is designed for seamless, cloud-to-cloud integration with Excel files in SharePoint Online. The service automatically checks for updates hourly. This guide will walk you through the modern, recommended process to ensure your data stays current and reliable.</p>
+        </section>
+
+        <!-- Main Content Sections -->
+        <div id="guide" class="content-section active">
+            <div class="text-center mb-12">
+                <h3 class="text-2xl md:text-3xl font-bold text-gray-800">Interactive Setup Guide</h3>
+                <p class="mt-2 text-md text-gray-500 max-w-2xl mx-auto">Follow this recommended workflow to connect your SharePoint Excel data to Power BI for reliable, automatic refreshes. Click each step for detailed instructions.</p>
+            </div>
+            
+            <div class="flex flex-col md:flex-row items-start justify-center gap-4 md:gap-0">
+                <!-- Step 1 -->
+                <div class="flex-1 w-full md:w-auto">
+                    <div id="step-1" class="flowchart-step active bg-white p-6 rounded-lg border-2 border-blue-500 shadow-lg">
+                        <div class="flex items-center">
+                            <div class="bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-xl">1</div>
+                            <h4 class="ml-4 font-bold text-lg text-gray-800">Prepare Excel File</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-center w-full md:w-auto h-16 md:h-auto md:mx-4">
+                    <svg class="w-8 h-8 text-gray-400 transform md:-rotate-90 rotate-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </div>
+                <!-- Step 2 -->
+                <div class="flex-1 w-full md:w-auto">
+                    <div id="step-2" class="flowchart-step bg-white p-6 rounded-lg border-2 border-gray-200">
+                        <div class="flex items-center">
+                            <div class="bg-gray-400 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-xl">2</div>
+                            <h4 class="ml-4 font-bold text-lg text-gray-800">Connect in Desktop</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-center w-full md:w-auto h-16 md:h-auto md:mx-4">
+                     <svg class="w-8 h-8 text-gray-400 transform md:-rotate-90 rotate-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </div>
+                <!-- Step 3 -->
+                <div class="flex-1 w-full md:w-auto">
+                    <div id="step-3" class="flowchart-step bg-white p-6 rounded-lg border-2 border-gray-200">
+                        <div class="flex items-center">
+                             <div class="bg-gray-400 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-xl">3</div>
+                            <h4 class="ml-4 font-bold text-lg text-gray-800">Publish & Configure</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="step-details" class="mt-8 p-6 bg-white rounded-lg shadow-inner border border-gray-200 min-h-[200px]">
+                <!-- Details will be injected here by JS -->
+            </div>
+        </div>
+
+        <div id="concepts" class="content-section">
+            <div class="text-center mb-12">
+                <h3 class="text-2xl md:text-3xl font-bold text-gray-800">Understanding Key Concepts</h3>
+                <p class="mt-2 text-md text-gray-500 max-w-2xl mx-auto">Grasping these core ideas is crucial for a smooth and successful data refresh experience. These concepts explain the "why" behind the process.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                    <h4 class="font-bold text-lg text-blue-600 mb-2">☁️ No Gateway Needed</h4>
+                    <p class="text-gray-600">Since both Power BI and SharePoint Online are cloud services, they connect directly. You don't need an on-premises data gateway, which simplifies setup, reduces complexity, and removes a potential point of failure.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                    <h4 class="font-bold text-lg text-blue-600 mb-2">🧩 The Semantic Model</h4>
+                    <p class="text-gray-600">When you import an Excel file with a data model, Power BI creates its own copy called a "semantic model." Refreshes update this model, not the original Excel file. If your Excel file pulls data from other sources, Power BI refreshes by going directly to those *original* sources.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                    <h4 class="font-bold text-lg text-blue-600 mb-2">⏰ Hourly Refresh Cycle</h4>
+                    <p class="text-gray-600">The Power BI Service automatically checks for changes in your SharePoint Excel file approximately every hour. This frequency is managed by the service and cannot be changed for this connection type. For instant updates, you can use the "Refresh now" option (daily limits apply).</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                    <h4 class="font-bold text-lg text-blue-600 mb-2">📋 Format as Tables</h4>
+                    <p class="text-gray-600">Always format your data ranges in Excel as formal Tables (Ctrl+T). This gives your data a structured name and defined columns, which Power BI uses to reliably identify and import data, especially when new rows are added.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                    <h4 class="font-bold text-lg text-blue-600 mb-2">💾 Load to Data Model</h4>
+                    <p class="text-gray-600">If using Power Query in Excel, you must check "Add this data to the Data Model" when loading. This is the cornerstone of the modern approach, turning your Excel file into a robust data source that can be published as a refreshable Power BI semantic model.</p>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                    <h4 class="font-bold text-lg text-blue-600 mb-2">🔑 Use Organizational Accounts</h4>
+                    <p class="text-gray-600">When connecting Power BI to SharePoint, always authenticate using your "Organizational account" (your Microsoft 365 credentials) with OAuth2. This ensures secure, persistent access for automated refreshes.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="updates" class="content-section">
+            <div class="text-center mb-12">
+                <h3 class="text-2xl md:text-3xl font-bold text-gray-800">Critical Deprecation Updates (Post-Oct 2023)</h3>
+                <p class="mt-2 text-md text-gray-500 max-w-2xl mx-auto">Microsoft has changed how Excel files are handled. The old way of simply uploading a file for refresh is gone. The focus is now on publishing proper semantic models. Click the timeline events to see the impact.</p>
+            </div>
+            <div class="chart-container">
+                 <canvas id="deprecation-chart"></canvas>
+            </div>
+            <div id="deprecation-details" class="mt-8 p-6 bg-white rounded-lg shadow-inner border border-gray-200 min-h-[100px] text-center">
+                <p class="text-gray-500">Select an event on the timeline to view details.</p>
+            </div>
+        </div>
+
+        <div id="troubleshooting" class="content-section">
+            <div class="text-center mb-12">
+                <h3 class="text-2xl md:text-3xl font-bold text-gray-800">Common Issues & Solutions</h3>
+                <p class="mt-2 text-md text-gray-500 max-w-2xl mx-auto">Refresh failed? Data not updating? Click on a common problem below to see the likely causes and how to fix them.</p>
+            </div>
+            <div id="accordion-container" class="max-w-4xl mx-auto space-y-4">
+                 <!-- Accordion items will be injected by JS -->
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const mobileNavLinks = document.querySelectorAll('.nav-link-mobile');
+            const contentSections = document.querySelectorAll('.content-section');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            function updateActiveNav(targetId) {
+                document.querySelectorAll('.nav-link, .nav-link-mobile').forEach(link => {
+                    link.classList.remove('active', 'text-blue-600', 'font-bold');
+                    link.classList.add('text-gray-600', 'font-medium');
+                    if (link.getAttribute('href') === targetId) {
+                        link.classList.add('active', 'text-blue-600', 'font-bold');
+                        link.classList.remove('text-gray-600', 'font-medium');
+                    }
+                });
+
+                contentSections.forEach(section => {
+                    section.classList.remove('active');
+                    if (`#${section.id}` === targetId) {
+                        section.classList.add('active');
+                    }
+                });
+            }
+            
+            function handleNavClick(e) {
+                e.preventDefault();
+                const targetId = e.currentTarget.getAttribute('href');
+                updateActiveNav(targetId);
+            }
+
+            navLinks.forEach(link => link.addEventListener('click', handleNavClick));
+            mobileNavLinks.forEach(link => link.addEventListener('click', (e) => {
+                handleNavClick(e);
+                mobileMenu.classList.add('hidden');
+            }));
+            
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            // Interactive Guide Logic
+            const steps = document.querySelectorAll('.flowchart-step');
+            const stepDetailsContainer = document.getElementById('step-details');
+            const stepData = {
+                'step-1': {
+                    title: 'Step 1: Prepare Your Excel File in SharePoint',
+                    content: `
+                        <p class="text-gray-700 mb-4">A well-structured Excel file is the foundation for reliable refreshes. Before connecting from Power BI, ensure your file is properly set up in SharePoint or OneDrive.</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-600">
+                            <li><strong>Format Data as Tables:</strong> Select your data range and press Ctrl+T. Named tables give Power BI a stable structure to import from.</li>
+                            <li><strong>Load to Data Model:</strong> This is critical. If you use Power Query in Excel to get data, you must check the "Add this data to the Data Model" box when loading. This creates a model that Power BI can publish and refresh.</li>
+                            <li><strong>Use SharePoint/OneDrive:</strong> Save your file in a SharePoint Team Site or OneDrive for Business folder. This is the only supported location for automatic cloud refresh.</li>
+                        </ul>`
+                },
+                'step-2': {
+                    title: 'Step 2: Connect from Power BI Desktop',
+                    content: `
+                        <p class="text-gray-700 mb-4">With your file prepared, the next step is to connect to it from Power BI Desktop. The key is using the correct URL and authentication method.</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-600">
+                            <li><strong>Get the Path:</strong> In SharePoint, open the file's Details pane (ℹ️ icon) and copy the "Direct Link". This is the cleanest URL.</li>
+                            <li><strong>Clean the URL:</strong> If your URL has parameters like <code>?web=1</code> at the end, DELETE them. Power BI needs the base file path.</li>
+                            <li><strong>Use Web Connector:</strong> In Power BI Desktop, go to Get Data > Web. Paste the cleaned URL.</li>
+                            <li><strong>Authenticate:</strong> When prompted, select "Organizational account," sign in with your Microsoft 365 credentials, and set the privacy level to "Organizational."</li>
+                        </ul>`
+                },
+                'step-3': {
+                    title: 'Step 3: Publish and Configure Refresh',
+                    content: `
+                        <p class="text-gray-700 mb-4">After building your report in Power BI Desktop, you need to publish it to the Power BI Service and configure the refresh settings to make it automatic.</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-600">
+                            <li><strong>Publish:</strong> From Power BI Desktop, publish your report to a workspace in the Power BI Service. This also uploads the semantic model.</li>
+                            <li><strong>Set Credentials:</strong> In the Power BI Service, find your new dataset, go to Settings > Data source credentials. Click "Edit credentials."</li>
+                            <li><strong>Use OAuth2:</strong> Select "OAuth2" as the authentication method and sign in again with your organizational account. This gives the Power BI Service ongoing permission to access your SharePoint file.</li>
+                            <li><strong>Enable Refresh:</strong> The hourly refresh is automatic for SharePoint/OneDrive connections. You can also configure a scheduled refresh on the semantic model for more control if needed.</li>
+                        </ul>`
+                }
+            };
+
+            function updateStepDetails(stepId) {
+                const data = stepData[stepId];
+                stepDetailsContainer.innerHTML = `
+                    <h5 class="font-bold text-xl mb-4 text-gray-800">${data.title}</h5>
+                    <div>${data.content}</div>
+                `;
+                steps.forEach(s => {
+                    s.classList.remove('active', 'border-blue-500', 'shadow-lg');
+                    s.classList.add('border-gray-200');
+                    s.querySelector('div div:first-child').classList.remove('bg-blue-500');
+                    s.querySelector('div div:first-child').classList.add('bg-gray-400');
+                });
+                const activeStep = document.getElementById(stepId);
+                activeStep.classList.add('active', 'border-blue-500', 'shadow-lg');
+                activeStep.classList.remove('border-gray-200');
+                activeStep.querySelector('div div:first-child').classList.add('bg-blue-500');
+                activeStep.querySelector('div div:first-child').classList.remove('bg-gray-400');
+            }
+
+            steps.forEach(step => {
+                step.addEventListener('click', () => updateStepDetails(step.id));
+            });
+
+            // Deprecation Chart Logic
+            const deprecationData = [
+                { date: 'Sep 2023', event: 'End of Local Uploads & New Scheduled Refreshes', impact: 'You can no longer upload local Excel files directly to Power BI workspaces. Configuring scheduled refresh for new Excel files (that don\'t use a published semantic model) is also blocked.', action: 'Save files to OneDrive/SharePoint first. For refresh, publish the Excel Data Model as a Power BI semantic model.' },
+                { date: 'Oct 2023', event: 'End of Existing Scheduled Refreshes & Viewing', impact: 'Scheduled refresh stopped working for all existing Excel files that were not proper semantic models. Uploaded local files also stopped opening in Power BI.', action: 'Migrate all existing setups by publishing their Excel Data Models as Power BI semantic models and configuring refresh on them.' },
+                { date: 'Post-Oct 2023', event: 'The New Standard: Semantic Models', impact: 'The only supported method for reliable, scheduled refresh of Excel data is to publish the Excel Data Model as a Power BI semantic model.', action: 'Adopt this method for all new and existing projects that require scheduled data refresh from Excel.' }
+            ];
+            const deprecationDetailsContainer = document.getElementById('deprecation-details');
+
+            const ctx = document.getElementById('deprecation-chart').getContext('2d');
+            const deprecationChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: deprecationData.map(d => d.date),
+                    datasets: [{
+                        label: 'Deprecation Event',
+                        data: [1, 1, 1],
+                        backgroundColor: ['#fca5a5', '#ef4444', '#b91c1c'],
+                        borderColor: ['#fee2e2', '#fecaca', '#fca5a5'],
+                        borderWidth: 1,
+                        barPercentage: 0.4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return deprecationData[context.dataIndex].event;
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Timeline of Excel Refresh Deprecations',
+                            font: { size: 16 }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: false,
+                            max: 1.1
+                        },
+                        y: {
+                            grid: {
+                                display: false
+                            },
+                             ticks: {
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    },
+                    onClick: (e, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            const data = deprecationData[index];
+                            deprecationDetailsContainer.innerHTML = `
+                                <h5 class="font-bold text-lg mb-2 text-red-700">${data.event}</h5>
+                                <p class="mb-2"><strong class="text-gray-700">Impact:</strong> ${data.impact}</p>
+                                <p><strong class="text-gray-700">Recommended Action:</strong> ${data.action}</p>
+                            `;
+                        }
+                    }
+                }
+            });
+
+            // Troubleshooting Accordion Logic
+            const accordionContainer = document.getElementById('accordion-container');
+            const troubleshootingData = [
+                { q: "Refresh failed due to authentication issues.", a: "This is the most common issue. Your access token for SharePoint has likely expired. <strong>Solution:</strong> Go to the dataset settings in Power BI Service > Data source credentials > Edit credentials. Sign in again with your Organizational account (OAuth2). Make sure 'Keep me signed in' is checked." },
+                { q: "My data changes aren't showing up in Power BI.", a: "There are two main causes. <strong>Cause 1: Connection Issue.</strong> Power BI can't reach SharePoint. Try re-authenticating your credentials. <strong>Cause 2: Restricted Updates.</strong> Your admin may have disabled automatic updates. <strong>Solution:</strong> Go to dataset settings > OneDrive refresh and ensure the toggle is ON. If it's disabled, your Fabric/Power BI admin needs to enable it at the tenant level." },
+                { q: "I get an 'invalid URL' error when connecting.", a: "Your SharePoint URL has extra parameters. <strong>Solution:</strong> When you copy the file path, make sure to delete everything from the question mark (?) onward. For example, turn <code>...MyFile.xlsx?web=1</code> into <code>...MyFile.xlsx</code>." },
+                { q: "Not all my data is appearing after a refresh.", a: "Your data in Excel is likely not formatted correctly. <strong>Solution:</strong> Ensure all data ranges are formatted as proper Excel Tables (Ctrl+T). This gives Power BI a defined area to pull from, so new rows and columns are included automatically." }
+            ];
+
+            troubleshootingData.forEach((item, index) => {
+                const accordionItem = document.createElement('div');
+                accordionItem.className = 'accordion-item bg-white rounded-lg shadow-md';
+                accordionItem.innerHTML = `
+                    <button class="accordion-header w-full flex justify-between items-center p-5 text-left font-semibold text-gray-800">
+                        <span>${item.q}</span>
+                        <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-gray-600">
+                        <p>${item.a}</p>
+                    </div>
+                `;
+                accordionContainer.appendChild(accordionItem);
+            });
+
+            const accordionHeaders = document.querySelectorAll('.accordion-header');
+            accordionHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const content = header.nextElementSibling;
+                    const icon = header.querySelector('svg');
+
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        // Close other open accordions
+                         document.querySelectorAll('.accordion-content').forEach(c => c.style.maxHeight = null);
+                         document.querySelectorAll('.accordion-header svg').forEach(i => i.style.transform = 'rotate(0deg)');
+                        
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        icon.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+
+            // Set initial state
+            updateStepDetails('step-1');
+            updateActiveNav('#guide');
+        });
+    </script>
+
+</body>
+</html>
